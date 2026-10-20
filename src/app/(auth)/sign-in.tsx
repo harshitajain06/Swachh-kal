@@ -7,6 +7,8 @@ import { KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } fro
 import Animated, { FadeInDown, FadeInUp, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Character } from '../../components/Character';
+import { Image } from 'expo-image';
+import { LOGO } from '../../data/art';
 import { Bouncy, Button, Screen, T } from '../../components/UI';
 import { HERO_ORDER } from '../../data/content';
 import { colors, fonts, radius } from '../../theme';
@@ -24,6 +26,7 @@ export default function SignInScreen() {
   const [password, setPassword] = useState('');
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
+  const [showPw, setShowPw] = useState(false);
   const [err, setErr] = useState('');
 
   const fail = (e: any) => setErr(e?.errors?.[0]?.longMessage || e?.errors?.[0]?.message || 'Oops! Something went wrong. Try again.');
@@ -101,7 +104,7 @@ export default function SignInScreen() {
               ))}
             </View>
             <Animated.View entering={FadeInUp.delay(500)} style={{ alignItems: 'center', marginTop: 8 }}>
-              <Text style={{ fontFamily: fonts.display, fontSize: 46, color: colors.brand, lineHeight: 52 }}>Swachh Kal</Text>
+              <Image source={LOGO} style={{ width: 170, height: 170, borderRadius: 40 }} contentFit="contain" />
               <T v="h3" style={{ color: colors.pink }}>आज आपका कल है</T>
             </Animated.View>
 
@@ -111,7 +114,12 @@ export default function SignInScreen() {
                   <Button label="Continue with Google" icon="🚀" onPress={google} disabled={busy} color="#FF5CA8" dark="#C93A80" />
                   <T v="small" style={{ textAlign: 'center' }}>— or use your email —</T>
                   <TextInput style={input} placeholder="Email" placeholderTextColor="#A9A2C4" autoCapitalize="none" keyboardType="email-address" value={email} onChangeText={setEmail} />
-                  <TextInput style={input} placeholder="Password" placeholderTextColor="#A9A2C4" secureTextEntry value={password} onChangeText={setPassword} />
+                  <View>
+                    <TextInput style={[input, { paddingRight: 56 }]} placeholder="Secret password" placeholderTextColor="#A9A2C4" secureTextEntry={!showPw} value={password} onChangeText={setPassword} />
+                    <Bouncy onPress={() => setShowPw(!showPw)} style={{ position: 'absolute', right: 14, top: 12 }}>
+                      <Text style={{ fontSize: 26 }}>{showPw ? '🙈' : '👀'}</Text>
+                    </Bouncy>
+                  </View>
                 </>
               ) : (
                 <>

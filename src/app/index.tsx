@@ -8,7 +8,7 @@ import { useGame } from '../lib/game';
 
 export default function Gate() {
   const { isLoaded, isSignedIn } = useAuth();
-  const { ready, profile, pledgedAt } = useGame();
+  const { ready, profile, pledgedAt, consentAt } = useGame();
 
   if (!isLoaded || (isSignedIn && !ready)) {
     return (
@@ -22,6 +22,7 @@ export default function Gate() {
   }
   if (!isSignedIn) return <Redirect href="/sign-in" />;
   if (!profile) return <Redirect href="/onboarding" />;
+  if (!consentAt) return <Redirect href="/consent" />;
   if (!pledgedAt) return <Redirect href="/about" />;
   return <Redirect href="/(tabs)" />;
 }

@@ -4,6 +4,8 @@ import { Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSequence, withSpring, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Bouncy } from '../../components/UI';
+import { HERO_ORDER } from '../../data/content';
+import { useGame } from '../../lib/game';
 import { setupNotifications } from '../../lib/notifications';
 import { colors, fonts, shadow } from '../../theme';
 
@@ -40,9 +42,11 @@ function TabItem({ name, focused, onPress }: { name: string; focused: boolean; o
 
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
+  const { isUnlocked } = useGame();
+  const unlockedKey = HERO_ORDER.filter(isUnlocked).join(',');
   useEffect(() => {
-    setupNotifications();
-  }, []);
+    setupNotifications(unlockedKey.split(',') as any);
+  }, [unlockedKey]);
   return (
     <Tabs
       screenOptions={{ headerShown: false, animation: 'shift' }}

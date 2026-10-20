@@ -9,7 +9,7 @@ import { useGame } from '../lib/game';
 import { colors, fonts } from '../theme';
 import { HeroBadge, SuperBadge } from './Badge';
 import { Character } from './Character';
-import { Button, Confetti, Pulse, T } from './UI';
+import { Button, Confetti, Pulse, Rainbow, T } from './UI';
 
 const pickMsg = (list: string[]) => list[Math.floor(Math.random() * list.length)];
 
@@ -113,10 +113,14 @@ export function CelebrationHost() {
     const next = HERO_ORDER[idx + 1];
     body = (
       <View style={{ alignItems: 'center' }}>
-        <Character id={hero.id} size={180} mood="cheer" cape jump />
+        <Rainbow size={300} />
+        <View style={{ marginTop: -70 }}>
+          <Character id={hero.id} size={180} mood="cheer" cape jump />
+        </View>
         <Animated.View entering={FadeInUp.delay(300)} style={{ alignItems: 'center' }}>
           <T v="title" style={{ color: '#fff', textAlign: 'center' }}>{doneMsg}</T>
-          <T v="h3" style={{ color: '#fff', textAlign: 'center' }}>You’re a {hero.heroTitle}! 🥇</T>
+          <T v="h3" style={{ color: '#fff', textAlign: 'center' }}>{hero.completeMessage}</T>
+          <T v="h3" style={{ color: '#FFE27A', textAlign: 'center' }}>Badge: {hero.heroTitle} 🥇</T>
           <T style={{ color: '#fff', textAlign: 'center', marginTop: 10, fontFamily: fonts.bodyBold, fontSize: 17 }}>{TRANSITIONS[hero.id].done}</T>
           {next ? (
             <View style={{ marginTop: 14, flexDirection: 'row', alignItems: 'center', backgroundColor: '#ffffff30', borderRadius: 24, padding: 10, paddingRight: 18 }}>
@@ -131,15 +135,19 @@ export function CelebrationHost() {
     bg = ['#FFB300', '#FF5CA8'];
     body = (
       <View style={{ alignItems: 'center' }}>
-        <SuperBadge size={240} />
+        <Rainbow size={300} />
+        <View style={{ marginTop: -60 }}>
+          <SuperBadge size={220} />
+        </View>
         <Animated.View entering={FadeInUp.delay(400)} style={{ alignItems: 'center' }}>
           <T v="title" style={{ color: '#fff', textAlign: 'center' }}>🦸 Swachh Kal Superhero!</T>
           <T v="h3" style={{ color: '#fff', textAlign: 'center' }}>All 4 Hero missions complete</T>
           <View style={{ flexDirection: 'row', marginTop: 10 }}>
             {HERO_ORDER.map((id) => (
-              <Character key={id} id={id} size={62} mood="cheer" cape jump />
+              <HeroBadge key={id} heroId={id} tier="gold" size={70} />
             ))}
           </View>
+          <T style={{ color: '#fff', marginTop: 6, fontFamily: fonts.bodyBold }}>All characters are healthy! You are a Swachh Hero ⭐</T>
         </Animated.View>
       </View>
     );

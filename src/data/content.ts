@@ -1,3 +1,5 @@
+import { Block, DOC } from './docContent';
+
 export type HeroId = 'vayu' | 'tarun' | 'dharti' | 'jal';
 export type Tier = 'bronze' | 'silver' | 'gold';
 
@@ -26,9 +28,17 @@ export interface Hero {
   sadFacts: string[];
   sdg: { title: string; url: string }[];
   goal: string;
+  /** From the client's doc */
+  fullStoryTitle: string;
+  fullStory: string[];
+  completeMessage: string;
+  microHabits: Habit[];
+  quickFacts: string[];
+  explainer: Block[];
 }
 
-export const HEROES: Hero[] = [
+type Enriched = 'fullStoryTitle' | 'fullStory' | 'completeMessage' | 'microHabits' | 'quickFacts' | 'explainer';
+const BASE_HEROES: Omit<Hero, Enriched>[] = [
   {
     id: 'vayu',
     name: 'Vayu',
@@ -244,6 +254,21 @@ export const HEROES: Hero[] = [
     ],
   },
 ];
+
+// Merge in the long-form content from the client's Google Doc.
+export const HEROES: Hero[] = BASE_HEROES.map((h) => {
+  const d = DOC[h.id];
+  return {
+    ...h,
+    fullStoryTitle: d.storyTitle,
+    fullStory: d.storyLines,
+    completeMessage: d.completeMessage,
+    microHabits: d.microHabits.map((text, i) => ({ id: `${h.id}-m${i + 1}`, tag: `Habit ${i + 1}`, text })),
+    quickFacts: d.quickFacts,
+    explainer: d.explainer,
+    sdg: d.articles,
+  };
+});
 
 export const HERO_ORDER: HeroId[] = ['vayu', 'tarun', 'dharti', 'jal'];
 export const heroById = (id: HeroId) => HEROES.find((h) => h.id === id)!;

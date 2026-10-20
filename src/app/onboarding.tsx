@@ -33,7 +33,7 @@ export default function Onboarding() {
   const next = async () => {
     if (step < 3) return setStep(step + 1);
     await saveProfile({ name: name.trim(), age: age ? parseInt(age, 10) : undefined, country: country.trim(), city: city.trim(), role, gender });
-    router.replace('/about');
+    router.replace('/consent');
   };
 
   const input = { backgroundColor: '#fff', borderRadius: radius.md, paddingHorizontal: 18, paddingVertical: 14, fontFamily: fonts.bodyBold, fontSize: 18, color: colors.ink, borderWidth: 3, borderColor: colors.line } as const;

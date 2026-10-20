@@ -1,64 +1,38 @@
+import { Image } from 'expo-image';
 import React, { useEffect } from 'react';
 import { Text, View } from 'react-native';
-import Animated, { Easing, useAnimatedStyle, useSharedValue, withDelay, withRepeat, withSequence, withSpring, withTiming } from 'react-native-reanimated';
-import Svg, { Circle, Defs, LinearGradient, Path, Polygon, Stop } from 'react-native-svg';
+import Animated, { Easing, useAnimatedStyle, useSharedValue, withDelay, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
+import Svg, { Path } from 'react-native-svg';
+import { ULTIMATE_BADGE, LEVEL_BADGE } from '../data/art';
 import { HeroId, Tier, heroById } from '../data/content';
 import { colors, fonts } from '../theme';
 
-const TIER_COLORS: Record<Tier, [string, string]> = {
-  bronze: ['#F2B27A', '#B8692B'],
-  silver: ['#F4F7FB', '#9AA7BA'],
-  gold: ['#FFE27A', '#F5A800'],
-};
-
-function star(cx: number, cy: number, R: number, r: number, n = 5) {
-  const pts: string[] = [];
-  for (let i = 0; i < n * 2; i++) {
-    const a = (Math.PI / n) * i - Math.PI / 2;
-    const rad = i % 2 === 0 ? R : r;
-    pts.push(`${cx + Math.cos(a) * rad},${cy + Math.sin(a) * rad}`);
-  }
-  return pts.join(' ');
-}
-
+/** Level 1/2/3 medal from the client, with a small chip showing which hero it belongs to. */
 export function HeroBadge({ heroId, tier, size = 96, earned = true, animate = true }: { heroId: HeroId; tier: Tier; size?: number; earned?: boolean; animate?: boolean }) {
   const hero = heroById(heroId);
-  const [c1, c2] = TIER_COLORS[tier];
   const wob = useSharedValue(0);
   const shine = useSharedValue(0);
   useEffect(() => {
     if (!earned || !animate) return;
-    wob.value = withRepeat(withSequence(withTiming(-6, { duration: 1100, easing: Easing.inOut(Easing.sin) }), withTiming(6, { duration: 1100, easing: Easing.inOut(Easing.sin) })), -1, true);
+    wob.value = withRepeat(withSequence(withTiming(-5, { duration: 1100, easing: Easing.inOut(Easing.sin) }), withTiming(5, { duration: 1100, easing: Easing.inOut(Easing.sin) })), -1, true);
     shine.value = withRepeat(withSequence(withDelay(1500, withTiming(1, { duration: 700 })), withTiming(0, { duration: 0 })), -1);
   }, [earned, animate]);
   const a = useAnimatedStyle(() => ({ transform: [{ rotate: `${wob.value}deg` }] }));
-  const sh = useAnimatedStyle(() => ({ opacity: 0.8 * (1 - Math.abs(shine.value - 0.5) * 2), transform: [{ translateX: -size * 0.5 + shine.value * size }, { rotate: '20deg' }] }));
+  const sh = useAnimatedStyle(() => ({ opacity: 0.7 * (1 - Math.abs(shine.value - 0.5) * 2), transform: [{ translateX: -size * 0.6 + shine.value * size * 1.2 }, { rotate: '20deg' }] }));
   return (
-    <Animated.View style={[{ width: size, height: size, opacity: earned ? 1 : 0.35 }, a]}>
-      <Svg width={size} height={size} viewBox="0 0 100 100">
-        <Defs>
-          <LinearGradient id={`m-${heroId}-${tier}`} x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0" stopColor={c1} />
-            <Stop offset="1" stopColor={c2} />
-          </LinearGradient>
-        </Defs>
-        <Path d="M30 4 L50 40 L70 4 Z" fill={hero.colors[1]} />
-        <Path d="M38 4 L50 28 L62 4 Z" fill={hero.colors[0]} />
-        <Circle cx={50} cy={62} r={34} fill={`url(#m-${heroId}-${tier})`} />
-        <Circle cx={50} cy={62} r={27} fill={earned ? hero.soft : '#ddd'} stroke={c2} strokeWidth={3} />
-      </Svg>
-      <View style={{ position: 'absolute', left: 0, right: 0, top: size * 0.46, alignItems: 'center' }}>
-        <Text style={{ fontSize: size * 0.34 }}>{earned ? hero.emoji : '🔒'}</Text>
+    <Animated.View style={[{ width: size, height: size }, a]}>
+      <View style={{ width: size, height: size, borderRadius: size * 0.2, overflow: 'hidden', opacity: earned ? 1 : 0.28 }}>
+        <Image source={LEVEL_BADGE[tier]} style={{ width: size, height: size }} contentFit="cover" />
+        {earned && animate ? <Animated.View pointerEvents="none" style={[{ position: 'absolute', top: -size * 0.1, width: size * 0.12, height: size * 1.3, backgroundColor: '#fff' }, sh]} /> : null}
       </View>
-      {earned && animate ? (
-        <View style={{ position: 'absolute', left: size * 0.16, top: size * 0.28, width: size * 0.68, height: size * 0.68, borderRadius: 99, overflow: 'hidden' }} pointerEvents="none">
-          <Animated.View style={[{ width: size * 0.12, height: size * 1.2, backgroundColor: '#fff' }, sh]} />
-        </View>
-      ) : null}
+      <View style={{ position: 'absolute', right: -2, bottom: -2, width: size * 0.34, height: size * 0.34, borderRadius: 99, backgroundColor: hero.colors[1], borderWidth: 2, borderColor: '#fff', alignItems: 'center', justifyContent: 'center' }}>
+        <Text style={{ fontSize: size * 0.18 }}>{earned ? hero.emoji : '🔒'}</Text>
+      </View>
     </Animated.View>
   );
 }
 
+/** The final Swachh Kal badge, with rotating sun rays. */
 export function SuperBadge({ size = 140, earned = true }: { size?: number; earned?: boolean }) {
   const spin = useSharedValue(0);
   const pop = useSharedValue(1);
@@ -78,23 +52,9 @@ export function SuperBadge({ size = 140, earned = true }: { size?: number; earne
           ))}
         </Svg>
       </Animated.View>
-      <Animated.View style={[{ width: size * 0.74, height: size * 0.74 }, body]}>
-        <Svg width={size * 0.74} height={size * 0.74} viewBox="0 0 100 100">
-          <Defs>
-            <LinearGradient id="sg" x1="0" y1="0" x2="1" y2="1">
-              <Stop offset="0" stopColor="#FFF1A8" />
-              <Stop offset="1" stopColor="#F5A800" />
-            </LinearGradient>
-          </Defs>
-          <Circle cx={50} cy={50} r={46} fill="url(#sg)" stroke="#C77F00" strokeWidth={3} />
-          <Circle cx={50} cy={50} r={37} fill="#7C4DFF" />
-          <Polygon points={star(50, 52, 26, 11)} fill="#FFE27A" stroke="#fff" strokeWidth={2} strokeLinejoin="round" />
-        </Svg>
-        <View style={{ position: 'absolute', inset: 0, alignItems: 'center', justifyContent: 'center' }}>
-          <Text style={{ fontSize: size * 0.2, marginTop: -size * 0.12 }}>🌍</Text>
-        </View>
+      <Animated.View style={[{ width: size * 0.78, height: size * 0.78, borderRadius: size * 0.2, overflow: 'hidden' }, body]}>
+        <Image source={ULTIMATE_BADGE} style={{ width: '100%', height: '100%' }} contentFit="cover" />
       </Animated.View>
-      <Text style={{ position: 'absolute', bottom: 0, fontFamily: fonts.display, color: colors.ink, fontSize: size * 0.11 }}>SWACHH KAL</Text>
     </View>
   );
 }

@@ -4,6 +4,8 @@ import { ScrollView, Text, View } from 'react-native';
 import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Character } from '../components/Character';
+import { Image } from 'expo-image';
+import { LOGO } from '../data/art';
 import { Bouncy, Button, Card, Screen, T } from '../components/UI';
 import { ABOUT_TEXT, HERO_ORDER } from '../data/content';
 import { useGame } from '../lib/game';
@@ -26,7 +28,7 @@ export default function About() {
                 <Character key={id} id={id} size={70} />
               ))}
             </View>
-            <Text style={{ fontFamily: fonts.display, fontSize: 40, color: colors.brand }}>Swachh Kal</Text>
+            <Image source={LOGO} style={{ width: 150, height: 150, borderRadius: 36, marginTop: 6 }} contentFit="contain" />
             <T v="h3" style={{ color: colors.pink }}>आज आपका कल है</T>
             <T v="small" style={{ marginTop: 2 }}>About the Swachh Kal App</T>
           </Animated.View>

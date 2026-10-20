@@ -1,16 +1,17 @@
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import Animated, { FadeInDown, FadeInRight, useAnimatedStyle, useSharedValue, withSequence, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Character } from '../../components/Character';
 import { Bar, Bouncy, Card, Pulse, Screen, T } from '../../components/UI';
-import { HEROES, HERO_ORDER, Hero, TIERS, heroById } from '../../data/content';
+import { HeroBadge, SuperBadge } from '../../components/Badge';
+import { HEROES, HERO_ORDER, Hero, MESSAGES, TIERS, heroById } from '../../data/content';
 import { dayKey } from '../../lib/dates';
 import { useGame } from '../../lib/game';
-import { colors, fonts, radius, shadow } from '../../theme';
+import { SMOG, colors, fonts, mix, radius, shadow } from '../../theme';
 
 function HeroCard({ hero, index }: { hero: Hero; index: number }) {
   const { count, isUnlocked, isComplete, tierOf } = useGame();
@@ -34,9 +35,12 @@ function HeroCard({ hero, index }: { hero: Hero; index: number }) {
     <Animated.View entering={FadeInDown.delay(150 + index * 120).springify().damping(11)} style={{ width: '48%' }}>
       <Animated.View style={shake}>
         <Bouncy onPress={open} haptic={unlocked}>
-          <LinearGradient colors={unlocked ? hero.colors : ['#C9C3DA', '#A9A2C4']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: radius.lg, padding: 14, minHeight: 230, ...shadow }}>
+          <LinearGradient colors={unlocked ? [mix(SMOG[0], hero.colors[0], n / 5), mix(SMOG[1], hero.colors[1], n / 5)] : ['#C9C3DA', '#A9A2C4']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: radius.lg, padding: 14, minHeight: 230, ...shadow }}>
             <View style={{ alignItems: 'center', marginTop: -2 }}>
               <Character id={hero.id} size={104} locked={!unlocked} cape={isComplete(hero.id)} />
+            </View>
+            <View style={{ alignSelf: 'flex-start', backgroundColor: '#00000026', borderRadius: 12, paddingHorizontal: 8, paddingVertical: 2, marginBottom: 2 }}>
+              <Text style={{ fontFamily: fonts.bodyBold, fontSize: 11, color: '#fff' }}>{!unlocked ? '🔒 Locked' : isComplete(hero.id) ? '✅ Completed' : n > 0 ? '⏳ In Progress' : '✨ New'}</Text>
             </View>
             <Text style={{ fontFamily: fonts.display, fontSize: 26, color: '#fff', lineHeight: 30 }}>{hero.hindi}</Text>
             <Text style={{ fontFamily: fonts.bodyBold, color: '#ffffffd0', fontSize: 13 }}>{hero.element} · {hero.name}</Text>
@@ -60,15 +64,28 @@ function HeroCard({ hero, index }: { hero: Hero; index: number }) {
   );
 }
 
+function RotatingMessage() {
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setI((x) => (x + 1) % MESSAGES.before.length), 4000);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <Animated.Text key={i} entering={FadeInDown.springify()} style={{ fontFamily: fonts.bodyBold, color: '#ffffffe8', fontSize: 13, marginTop: 2 }}>
+      ✨ {MESSAGES.before[i]}
+    </Animated.Text>
+  );
+}
+
 export default function Home() {
-  const { profile, streak, nextHero, count, totalDone, checkins, allComplete } = useGame();
+  const { profile, streak, nextHero, count, totalDone, checkins, allComplete, points } = useGame();
   const today = checkins[dayKey()] ?? {};
   const next = nextHero ? heroById(nextHero) : null;
   const hour = new Date().getHours();
   const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
   return (
-    <Screen>
+    <Screen gradient={allComplete ? ['#FFF4D6', '#FFD1EC'] : undefined}>
       <SafeAreaView style={{ flex: 1 }} edges={['top']}>
         <ScrollView contentContainerStyle={{ padding: 18, paddingBottom: 130 }} showsVerticalScrollIndicator={false}>
           <Animated.View entering={FadeInDown.springify()} style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -76,6 +93,7 @@ export default function Home() {
               <T v="small">Namaste! 🙏 {greet}</T>
               <Text style={{ fontFamily: fonts.display, fontSize: 30, lineHeight: 36, color: colors.ink }}>Hi {profile?.name || 'Hero'}!</Text>
               <T v="label" style={{ color: colors.brand }}>{allComplete ? 'You are a Swachh Kal Superhero! 🦸' : 'Ready to be a Swachh Hero?'}</T>
+              <T v="small" style={{ fontFamily: fonts.bodyBold, color: '#B07A00' }}>⭐ {points} points</T>
             </View>
             <Pulse>
               <View style={{ backgroundColor: '#fff', borderRadius: 24, paddingHorizontal: 12, paddingVertical: 8, alignItems: 'center', ...shadow }}>
@@ -86,6 +104,19 @@ export default function Home() {
             </Pulse>
           </Animated.View>
 
+          {allComplete && (
+            <Animated.View entering={FadeInDown.springify()} style={{ marginTop: 16, backgroundColor: '#fff', borderRadius: radius.lg, padding: 16, alignItems: 'center', ...shadow }}>
+              <SuperBadge size={150} />
+              <Text style={{ fontFamily: fonts.display, fontSize: 24, color: colors.ink }}>⭐ You are a Swachh Hero! ⭐</Text>
+              <View style={{ flexDirection: 'row', marginTop: 8 }}>
+                {HERO_ORDER.map((id) => (
+                  <HeroBadge key={id} heroId={id} tier="gold" size={62} />
+                ))}
+              </View>
+              <T v="small" style={{ marginTop: 6 }}>All characters are healthy and happy!</T>
+            </Animated.View>
+          )}
+
           {next && (
             <Animated.View entering={FadeInRight.delay(100).springify()} style={{ marginTop: 16 }}>
               <Bouncy onPress={() => router.push(`/hero/${next.id}`)}>
@@ -95,6 +126,7 @@ export default function Home() {
                     <Text style={{ fontFamily: fonts.bodyBold, color: '#FFE27A', fontSize: 12 }}>{count(next.id) === 0 ? 'NEW MISSION' : 'KEEP GOING'}</Text>
                     <Text style={{ fontFamily: fonts.display, color: '#fff', fontSize: 20, lineHeight: 24 }}>{next.goal}!</Text>
                     <Text style={{ fontFamily: fonts.body, color: '#ffffffe0', fontSize: 13 }}>{5 - count(next.id)} habits to go</Text>
+                    <RotatingMessage />
                   </View>
                   <Text style={{ fontSize: 28, color: '#fff' }}>▶</Text>
                 </LinearGradient>

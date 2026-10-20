@@ -1,6 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useMemo } from 'react';
+import Svg, { Path as SvgPath } from 'react-native-svg';
 import { Dimensions, Pressable, StyleProp, StyleSheet, Text, TextProps, TextStyle, View, ViewStyle } from 'react-native';
 import Animated, {
   Easing,
@@ -49,8 +50,12 @@ export function Bouncy({
 }) {
   const s = useSharedValue(1);
   const a = useAnimatedStyle(() => ({ transform: [{ scale: s.value }] }));
+  // Layout props (flex/width/margins) belong on the Pressable so it sizes correctly inside rows.
+  const { flex, width, minWidth, alignSelf, margin, marginTop, marginBottom, marginLeft, marginRight, marginHorizontal, marginVertical, ...inner } = (StyleSheet.flatten(style) || {}) as ViewStyle;
+  const outer: ViewStyle = { flex, width, minWidth, alignSelf, margin, marginTop, marginBottom, marginLeft, marginRight, marginHorizontal, marginVertical };
   return (
     <Pressable
+      style={outer}
       disabled={disabled}
       onPressIn={() => {
         s.value = withSpring(scaleTo, { damping: 12, stiffness: 400 });
@@ -59,7 +64,7 @@ export function Bouncy({
       onPressOut={() => (s.value = withSpring(1, { damping: 6, stiffness: 220 }))}
       onPress={onPress}
     >
-      <Animated.View style={[a, style]}>{children}</Animated.View>
+      <Animated.View style={[a, inner]}>{children}</Animated.View>
     </Pressable>
   );
 }
@@ -224,3 +229,24 @@ export function Bar({ value, color = colors.brand, track = '#00000014', height =
 const styles = StyleSheet.create({
   card: { backgroundColor: colors.card, borderRadius: radius.lg, padding: 18, ...shadow },
 });
+
+/** Animated rainbow arc (the doc swaps firecrackers for rainbow + confetti). */
+export function Rainbow({ size = 280 }: { size?: number }) {
+  const sc = useSharedValue(0);
+  useEffect(() => {
+    sc.value = withDelay(150, withSpring(1, { damping: 7, stiffness: 90 }));
+  }, []);
+  const a = useAnimatedStyle(() => ({ transform: [{ scale: sc.value }], opacity: sc.value }));
+  const bands = ['#FF4D4D', '#FF9F1C', '#FFE14D', '#4CD964', '#3FA9F5', '#7C4DFF'];
+  const r0 = size / 2 - 8;
+  return (
+    <Animated.View style={[{ width: size, height: size / 2 + 8 }, a]}>
+      <Svg width={size} height={size / 2 + 8} viewBox={`0 0 ${size} ${size / 2 + 8}`}>
+        {bands.map((c, i) => {
+          const r = r0 - i * 14;
+          return <SvgPath key={c} d={`M ${size / 2 - r} ${size / 2} A ${r} ${r} 0 0 1 ${size / 2 + r} ${size / 2}`} stroke={c} strokeWidth={14} fill="none" strokeLinecap="round" />;
+        })}
+      </Svg>
+    </Animated.View>
+  );
+}

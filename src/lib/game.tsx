@@ -3,6 +3,7 @@ import { useAuth, useUser } from '@clerk/clerk-expo';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { HEROES, HERO_ORDER, HeroId, TIERS, Tier, heroById } from '../data/content';
 import { api, platformName, setTokenGetter } from './api';
+import { notifyNow } from './notifications';
 import { dayKey, streakFrom } from './dates';
 
 export interface Profile {
@@ -29,6 +30,8 @@ interface Persisted {
   superheroAt: string | null;
   pledge365Start: string | null;
   seenIntro: boolean;
+  consentAt: string | null;
+  quizBest: Record<string, number>; // heroId -> best correct answers
 }
 
 const EMPTY: Persisted = {
@@ -40,6 +43,8 @@ const EMPTY: Persisted = {
   superheroAt: null,
   pledge365Start: null,
   seenIntro: false,
+  consentAt: null,
+  quizBest: {},
 };
 
 export type Celebration =
@@ -52,6 +57,7 @@ interface Ctx extends Persisted {
   ready: boolean;
   celebration: Celebration | null;
   dismissCelebration: () => void;
+  showCelebration: (c: Celebration) => void;
   askReview: boolean;
   dismissReview: () => void;
   saveProfile: (p: Profile) => Promise<void>;
@@ -60,6 +66,9 @@ interface Ctx extends Persisted {
   saveCheckin: (patch: CheckIn) => Promise<void>;
   markReviewed: (r: { heroRating: number; journeyRating: number; enjoyed: string[] }) => Promise<void>;
   startPledge365: () => Promise<void>;
+  acceptConsent: (guardian: boolean) => Promise<void>;
+  saveQuiz: (heroId: HeroId, correct: number) => void;
+  deleteMyData: () => Promise<void>;
   count: (heroId: HeroId) => number;
   tierOf: (heroId: HeroId) => Tier | null;
   isUnlocked: (heroId: HeroId) => boolean;
@@ -68,6 +77,9 @@ interface Ctx extends Persisted {
   totalDone: number;
   streak: number;
   nextHero: HeroId | null;
+  todayMicro: string[];
+  toggleMicro: (id: string) => void;
+  points: number;
 }
 
 const GameCtx = createContext<Ctx | null>(null);
@@ -125,6 +137,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           done,
           checkins,
           pledgedAt: me.pledgedAt || local.pledgedAt,
+          consentAt: me.consentAt || local.consentAt,
           reviewed: !!me.review?.at || local.reviewed,
           superheroAt: me.superheroAt || local.superheroAt,
           pledge365Start: me.pledge365Start || local.pledge365Start,
@@ -170,10 +183,20 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   const activeDays = useMemo(() => {
     const days = Object.values(state.done).map((iso) => dayKey(new Date(iso)));
-    Object.entries(state.checkins).forEach(([d, c]) => (c.morningCommitted || c.eveningSaved) && days.push(d));
+    Object.entries(state.checkins).forEach(([d, c]) => (c.morningCommitted || c.eveningSaved || (c.eveningCompleted?.length ?? 0) > 0) && days.push(d));
     return days;
   }, [state.done, state.checkins]);
   const streak = streakFrom(activeDays);
+
+  const todayMicro = state.checkins[dayKey()]?.eveningCompleted ?? [];
+
+  // AWorld-style points: actions, daily micro-habits, tier badges and the final superhero badge.
+  const points = useMemo(() => {
+    const micro = Object.values(state.checkins).reduce((a, c) => a + (c.eveningCompleted?.length ?? 0), 0);
+    const tiers = HEROES.reduce((a, h) => a + TIERS.filter((t) => h.habits.filter((x) => state.done[x.id]).length >= t.need).length, 0);
+    const quiz = Object.values(state.quizBest).reduce((a, n) => a + n * 15, 0);
+    return totalDone * 20 + micro * 10 + tiers * 50 + quiz + (state.superheroAt ? 500 : 0);
+  }, [state.done, state.checkins, state.superheroAt, state.quizBest, totalDone]);
 
   const saveProfile = useCallback(async (p: Profile) => {
     patch({ profile: p });
@@ -206,12 +229,15 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     if (wasDone) return;
     const crossed = TIERS.find((t) => before < t.need && after >= t.need);
     if (becameSuper) {
+      notifyNow('🦸 NEW BADGE EARNED!', 'You are a Swachh Kal Superhero!');
       setCelebration({ kind: 'superhero' });
       setAskReview(!s.reviewed);
     } else if (after === 5) {
+      notifyNow('🏆 HERO UNLOCKED!', `${hero.completeMessage}`);
       setCelebration({ kind: 'hero-complete', heroId });
       setAskReview(!s.reviewed);
     } else if (crossed) {
+      notifyNow('🏅 NEW BADGE EARNED!', hero.tierMessages[crossed.id]);
       setCelebration({ kind: 'tier', heroId, tier: crossed.id });
     }
   }, []);
@@ -221,6 +247,31 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     setState((s) => ({ ...s, checkins: { ...s.checkins, [key]: { ...s.checkins[key], ...p } } }));
     await api('/api/checkins', 'POST', { date: key, ...p });
   }, []);
+
+  const toggleMicro = useCallback((id: string) => {
+    const key = dayKey();
+    const cur = stateRef.current.checkins[key]?.eveningCompleted ?? [];
+    const next = cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id];
+    const ns = { ...stateRef.current, checkins: { ...stateRef.current.checkins, [key]: { ...stateRef.current.checkins[key], eveningCompleted: next } } };
+    stateRef.current = ns;
+    setState(ns);
+    api('/api/checkins', 'POST', { date: key, eveningCompleted: next });
+  }, []);
+
+  const acceptConsent = useCallback(async (guardian: boolean) => {
+    patch({ consentAt: new Date().toISOString() });
+    await api('/api/consent', 'POST', { version: '1', guardian });
+  }, [patch]);
+
+  const saveQuiz = useCallback((heroId: HeroId, correct: number) => {
+    setState((s) => ({ ...s, quizBest: { ...s.quizBest, [heroId]: Math.max(s.quizBest[heroId] ?? 0, correct) } }));
+  }, []);
+
+  const deleteMyData = useCallback(async () => {
+    await api('/api/me', 'DELETE');
+    if (userId) await AsyncStorage.removeItem(`sk:${userId}`).catch(() => {});
+    setState(EMPTY);
+  }, [userId]);
 
   const markReviewed = useCallback(async (r: { heroRating: number; journeyRating: number; enjoyed: string[] }) => {
     patch({ reviewed: true });
@@ -238,6 +289,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     ready,
     celebration,
     dismissCelebration: () => setCelebration(null),
+    showCelebration: setCelebration,
     askReview,
     dismissReview: () => setAskReview(false),
     saveProfile,
@@ -246,6 +298,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     saveCheckin,
     markReviewed,
     startPledge365,
+    acceptConsent,
+    saveQuiz,
+    deleteMyData,
     count,
     tierOf,
     isUnlocked,
@@ -254,6 +309,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     totalDone,
     streak,
     nextHero,
+    todayMicro,
+    toggleMicro,
+    points,
   };
   return <GameCtx.Provider value={value}>{children}</GameCtx.Provider>;
 }

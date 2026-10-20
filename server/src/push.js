@@ -5,10 +5,18 @@ const EXPO_RECEIPTS = 'https://exp.host/--/api/v2/push/getReceipts';
 
 const DAY = 24 * 60 * 60 * 1000;
 
-const HERO_BY_INDEX = [
-  { id: 'dharti', emoji: '🌱', title: 'Dharti needs you!', body: 'Have you completed your plant-care habit today?' },
-  { id: 'jal', emoji: '💧', title: 'Jal is waiting!', body: "You're just one habit away from completing today's challenge." },
-];
+const NEXT_HERO = {
+  vayu: { emoji: '💨', title: 'Vayu needs you!', body: 'Have you completed a Hawa Hero habit today?' },
+  tarun: { emoji: '🌱', title: 'Tarun needs you!', body: 'Have you completed your plant-care habit today?' },
+  dharti: { emoji: '🌍', title: 'Dharti needs you!', body: 'Can you be a Kachra Fighter today?' },
+  jal: { emoji: '💧', title: 'Jal is waiting!', body: "You're just one habit away from completing today's challenge." },
+};
+const ORDER = ['vayu', 'tarun', 'dharti', 'jal'];
+
+function nextHeroFor(user) {
+  const done = new Set((user.completedHabits || []).map((h) => h.habitId));
+  return ORDER.find((h) => [1, 2, 3, 4, 5].some((n) => !done.has(`${h}-${n}`))) || 'vayu';
+}
 
 function pickMessage(user, now) {
   const idle = now - new Date(user.lastActiveAt).getTime();
@@ -17,9 +25,9 @@ function pickMessage(user, now) {
   }
   const days = new Set((user.completedHabits || []).map((h) => new Date(h.at).toDateString()));
   if (days.size >= 3 && idle < DAY) {
-    return { title: '🔥 3-day streak!', body: "Keep going — you're one step closer to your next badge!" };
+    return { title: `🔥 ${days.size}-day streak!`, body: "Keep going — you're one step closer to your next badge!" };
   }
-  const h = HERO_BY_INDEX[Math.floor(Math.random() * HERO_BY_INDEX.length)];
+  const h = NEXT_HERO[nextHeroFor(user)];
   return { title: `${h.emoji} ${h.title}`, body: h.body };
 }
 

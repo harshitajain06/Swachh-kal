@@ -14,10 +14,9 @@
     "android": {
       "package": "org.swachhkal.app",
       "adaptiveIcon": {
-        "backgroundColor": "#FFF4D6",
+        "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "backgroundImage": "./assets/android-icon-background.png"
       },
       "predictiveBackGestureEnabled": false
     },
@@ -29,10 +28,34 @@
       "expo-secure-store",
       "expo-web-browser",
       "expo-font",
-      ["expo-notifications", { "color": "#7C4DFF" }]
+      [
+        "expo-notifications",
+        {
+          "color": "#7C4DFF"
+        }
+      ],
+      "expo-image",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 220,
+          "resizeMode": "contain",
+          "backgroundColor": "#FFF4D6"
+        }
+      ]
     ],
     "extra": {
-      "apiUrl": "http://localhost:4000"
-    }
+      "apiUrl": "http://localhost:4000",
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "84c9cd29-7e49-4a0e-9d08-731f57069c7c"
+      }
+    },
+    "owner": "harshita1992"
   }
 }

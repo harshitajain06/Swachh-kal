@@ -36,6 +36,9 @@ const UserSchema = new mongoose.Schema(
     role: String, // student | teacher | parent | ...
     gender: String,
     pledgedAt: Date,
+    consentAt: Date, // parent/guardian (or adult) accepted the privacy notice
+    consentVersion: String,
+    guardianConsent: { type: Boolean, default: false },
     completedHabits: [HabitDone],
     checkins: [CheckIn],
     engagement: [Engagement],

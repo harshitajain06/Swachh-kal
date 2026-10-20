@@ -36,8 +36,15 @@ Expo (SDK 58) + Expo Router + Reanimated 4 + Clerk auth, with an Express API on 
 | Time-spent tracking | `src/lib/engagement.ts` → `/api/engagement` |
 | Deleted / inactive users, admin access | `server/src/index.js` `/api/admin/*` (set `ADMIN_USER_IDS`) |
 
+## Also built from the doc
+- Client artwork: logo, level badges (Bronze/Silver/Gold = Level 1/2/3), ultimate badge, and the four heroes' scene art as story pictures (`assets/art`, `src/data/art.ts`). The *Hero Badges*, *Level Badges* and *Heroes taking pledge* Drive folders were not shared with the connector, so per-hero badge art is still missing.
+- Sort-it quizzes per hero (`src/data/quiz.ts`) built only from lists in the doc; points like AWorld.
+- Privacy notice + parent/guardian consent (`src/app/consent.tsx`, wording in `src/data/privacy.ts` is a DRAFT for legal review) and *Delete my data*.
+- Team dashboard (`/admin`) for users listed in `ADMIN_USER_IDS`.
+- Hosting: `server/Dockerfile`, `server/render.yaml`; app builds: `eas.json` (needs `eas init` to set the project id, which also enables remote push).
+
 ## Open items to confirm with the client
-- Character PNGs (Vayu/Tarun/Dharti/Jal), logo and level badge images weren't in the folder, so heroes are drawn in SVG. Drop in the PNGs via `HERO_IMAGES` in `Character.tsx`.
+- The animated mascots are still SVG; the client's PNGs are sad-state scenes, used as story pictures.
 - SDG article URLs in `content.ts` are placeholders — the doc only lists titles.
 - 365-day pledge daily content is still to be drafted (spec says so).
 - "Swachh Hero" name: the spec asks to check an alternative name.

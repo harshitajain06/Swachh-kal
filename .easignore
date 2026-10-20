@@ -1,0 +1,9 @@
+# Keep the upload small and let EAS generate native projects itself (Continuous Native Generation)
+/android
+/ios
+/server
+node_modules
+.expo
+.env
+.env.local
+*.log

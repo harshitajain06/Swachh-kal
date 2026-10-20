@@ -11,26 +11,21 @@ import { useGame } from '../lib/game';
 import { colors, fonts, radius } from '../theme';
 
 export default function CheckIn() {
-  const { checkins, saveCheckin, isUnlocked, done, toggleHabit, nextHero } = useGame();
+  const { checkins, saveCheckin, isUnlocked, todayMicro, toggleMicro, nextHero } = useGame();
   const today = checkins[dayKey()] ?? {};
   const evening = new Date().getHours() >= 15;
   const [mode, setMode] = useState<'morning' | 'evening'>(evening ? 'evening' : 'morning');
-  const [picked, setPicked] = useState<Record<string, boolean>>({});
   const [saved, setSaved] = useState(false);
 
-  const open = HEROES.filter((h) => isUnlocked(h.id)).flatMap((h) => h.habits.filter((x) => !done[x.id]).map((x) => ({ ...x, hero: h })));
+  const heroes = HEROES.filter((h) => isUnlocked(h.id));
+  const focus = nextHero ? HEROES.find((h) => h.id === nextHero)! : HEROES[0];
 
   const commit = async () => {
     await saveCheckin({ morningCommitted: true });
     setSaved(true);
   };
   const saveEvening = async () => {
-    const ids = Object.keys(picked).filter((k) => picked[k]);
-    ids.forEach((id) => {
-      const h = HEROES.find((x) => x.habits.some((y) => y.id === id))!;
-      toggleHabit(h.id, id);
-    });
-    await saveCheckin({ eveningSaved: true, eveningCompleted: ids });
+    await saveCheckin({ eveningSaved: true, eveningCompleted: todayMicro });
     setSaved(true);
   };
 
@@ -58,24 +53,28 @@ export default function CheckIn() {
               <Text style={{ fontSize: 120 }}>☀️</Text>
             </Pulse>
             <T v="title" style={{ textAlign: 'center' }}>Good morning, Hero!</T>
-            <T style={{ textAlign: 'center', marginVertical: 12, fontSize: 18 }}>Today I will make one better choice for our planet.</T>
+            <T style={{ textAlign: 'center', marginVertical: 12, fontSize: 18 }}>“Today I will help {focus.name}!”</T>
             {today.morningCommitted ? <T v="h3" style={{ color: '#1B8A32' }}>✅ You already committed today!</T> : <Button label="I Commit!" icon="🤝" onPress={commit} style={{ minWidth: 220 }} />}
           </View>
         ) : (
           <>
             <ScrollView contentContainerStyle={{ padding: 18, paddingBottom: 120, gap: 10 }}>
               <T v="h2">What did you complete today?</T>
-              {open.length === 0 && <T>You have no open habits right now — amazing!</T>}
-              {open.map((h, i) => (
-                <Animated.View key={h.id} entering={FadeInDown.delay(i * 60).springify()}>
-                  <Bouncy onPress={() => setPicked((p) => ({ ...p, [h.id]: !p[h.id] }))} style={{ flexDirection: 'row', gap: 12, alignItems: 'center', backgroundColor: picked[h.id] ? h.hero.soft : '#fff', borderRadius: radius.md, padding: 12, borderWidth: 3, borderColor: picked[h.id] ? h.hero.colors[1] : 'transparent' }}>
-                    <Text style={{ fontSize: 26 }}>{picked[h.id] ? '✅' : '⬜'}</Text>
-                    <View style={{ flex: 1 }}>
-                      <Text style={{ fontFamily: fonts.display, color: h.hero.dark }}>{h.hero.name} · {h.tag}</Text>
-                      <T v="small" style={{ color: colors.ink }}>{h.text}</T>
-                    </View>
-                  </Bouncy>
-                </Animated.View>
+              {heroes.map((h) => (
+                <View key={h.id} style={{ gap: 8 }}>
+                  <Text style={{ fontFamily: fonts.display, fontSize: 20, color: h.dark, marginTop: 6 }}>{h.emoji} {h.name}</Text>
+                  {h.microHabits.map((x, i) => {
+                    const on = todayMicro.includes(x.id);
+                    return (
+                      <Animated.View key={x.id} entering={FadeInDown.delay(i * 40).springify()}>
+                        <Bouncy onPress={() => toggleMicro(x.id)} style={{ flexDirection: 'row', gap: 12, alignItems: 'center', backgroundColor: on ? h.soft : '#fff', borderRadius: radius.md, padding: 12, borderWidth: 3, borderColor: on ? h.colors[1] : 'transparent' }}>
+                          <Text style={{ fontSize: 24 }}>{on ? '✅' : '⬜'}</Text>
+                          <T v="small" style={{ flex: 1, color: colors.ink, fontSize: 14 }}>{x.text}</T>
+                        </Bouncy>
+                      </Animated.View>
+                    );
+                  })}
+                </View>
               ))}
             </ScrollView>
             <View style={{ position: 'absolute', left: 24, right: 24, bottom: 28 }}>

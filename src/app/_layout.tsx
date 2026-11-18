@@ -8,6 +8,7 @@ import { StatusBar } from 'expo-status-bar';
 import React, { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { BookletBanner } from '../components/BookletBanner';
 import { CelebrationHost } from '../components/CelebrationHost';
 import { registerDevice } from '../lib/device';
 import { GameProvider } from '../lib/game';
@@ -26,6 +27,7 @@ export default function RootLayout() {
     const sub = Notifications.addNotificationResponseReceivedListener((r) => {
       const screen = (r.notification.request.content.data as any)?.screen;
       if (screen === 'checkin') router.push('/checkin');
+      else if (screen === 'hero') router.push({ pathname: '/hero/[id]', params: { id: (r.notification.request.content.data as any).heroId } });
     });
     return () => sub.remove();
   }, []);
@@ -44,6 +46,7 @@ export default function RootLayout() {
               <Stack.Screen name="hero/[id]" options={{ animation: 'fade_from_bottom' }} />
             </Stack>
             <CelebrationHost />
+            <BookletBanner />
           </GameProvider>
         </GestureHandlerRootView>
       </SafeAreaProvider>

@@ -1,12 +1,12 @@
 import { router } from 'expo-router';
-import * as WebBrowser from 'expo-web-browser';
 import React from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Character } from '../../components/Character';
 import { Bouncy, Button, Card, Screen, T } from '../../components/UI';
-import { BOOKLET_INSIDE, BOOKLET_URL, heroById } from '../../data/content';
+import { BOOKLET_INSIDE, heroById } from '../../data/content';
+import { openBooklet } from '../../lib/booklet';
 import { useTimeTracker } from '../../lib/engagement';
 import { colors, fonts, radius, shadow } from '../../theme';
 
@@ -41,7 +41,7 @@ export default function Learn() {
                 </View>
               </View>
             </View>
-            <Button label="Download the booklet" icon="⬇️" onPress={() => WebBrowser.openBrowserAsync(BOOKLET_URL)} style={{ marginTop: 16 }} />
+            <Button label="Download the booklet" icon="⬇️" onPress={() => openBooklet()} style={{ marginTop: 16 }} />
           </Card>
 
           <View style={{ gap: 14, marginTop: 14 }}>

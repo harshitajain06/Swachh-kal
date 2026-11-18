@@ -12,7 +12,8 @@ import { Smoke } from '../../components/Smoke';
 import { Bar, Bouncy, Button, Card, Pulse, T } from '../../components/UI';
 import { Image } from 'expo-image';
 import { HERO_SCENE } from '../../data/art';
-import { BOOKLET_URL, HeroId, TIERS, heroById } from '../../data/content';
+import { HeroId, TIERS, heroById } from '../../data/content';
+import { openBooklet } from '../../lib/booklet';
 import { useTimeTracker } from '../../lib/engagement';
 import { useGame } from '../../lib/game';
 import { STAGE_LABEL, SMOG, colors, fonts, mix, radius, shadow, stageOf } from '../../theme';
@@ -318,7 +319,7 @@ function ExploreTab({ id }: { id: HeroId }) {
         <Text style={{ fontSize: 32 }}>🎯</Text>
         <Text style={{ flex: 1, fontFamily: fonts.display, color: '#fff', fontSize: 19 }}>Test yourself: Sort-it quiz!</Text>
       </Bouncy>
-      <Button label="Read more in the booklet" icon="📘" onPress={() => WebBrowser.openBrowserAsync(BOOKLET_URL)} color={hero.colors[1]} dark={hero.dark} style={{ marginTop: 14 }} />
+      <Button label="Read more in the booklet" icon="📘" onPress={() => openBooklet()} color={hero.colors[1]} dark={hero.dark} style={{ marginTop: 14 }} />
     </View>
   );
 }

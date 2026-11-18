@@ -5,6 +5,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withSequence, withSpring, w
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Bouncy } from '../../components/UI';
 import { HERO_ORDER } from '../../data/content';
+import { dayKey } from '../../lib/dates';
 import { useGame } from '../../lib/game';
 import { setupNotifications } from '../../lib/notifications';
 import { colors, fonts, shadow } from '../../theme';
@@ -42,11 +43,16 @@ function TabItem({ name, focused, onPress }: { name: string; focused: boolean; o
 
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
-  const { isUnlocked } = useGame();
+  const { isUnlocked, ready, done, nextHero, count, streak, todayMicro } = useGame();
   const unlockedKey = HERO_ORDER.filter(isUnlocked).join(',');
+  const today = dayKey();
+  const habitToday = Object.values(done).some((iso) => dayKey(new Date(iso)) === today);
+  const activeToday = habitToday || todayMicro.length > 0;
+  const activeHeroDone = nextHero ? count(nextHero) : 0;
   useEffect(() => {
-    setupNotifications(unlockedKey.split(',') as any);
-  }, [unlockedKey]);
+    if (!ready) return;
+    setupNotifications({ unlocked: unlockedKey.split(',') as any, activeHero: nextHero, activeHeroDone, streak, habitToday, activeToday });
+  }, [ready, unlockedKey, nextHero, activeHeroDone, streak, habitToday, activeToday]);
   return (
     <Tabs
       screenOptions={{ headerShown: false, animation: 'shift' }}

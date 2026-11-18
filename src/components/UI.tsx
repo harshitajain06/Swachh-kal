@@ -92,7 +92,7 @@ export function Button({
       <View style={{ backgroundColor: dark, borderRadius: radius.pill, paddingBottom: 6 }}>
         <View style={{ backgroundColor: color, borderRadius: radius.pill, paddingVertical: 14, paddingHorizontal: 26, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8 }}>
           {icon ? <Text style={{ fontSize: 22 }}>{icon}</Text> : null}
-          <Text style={{ fontFamily: fonts.display, fontSize: 21, color: '#fff' }}>{label}</Text>
+          <Text style={{ fontFamily: fonts.display, fontSize: 21, color: /^#(fff|ffffff)$/i.test(color) ? colors.ink : '#fff' }}>{label}</Text>
         </View>
       </View>
     </Bouncy>

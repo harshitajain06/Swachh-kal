@@ -297,7 +297,6 @@ export const GENDERS = [
   { id: 'skip', label: 'Prefer not to say', emoji: '🤐' },
 ];
 
-export const BOOKLET_URL = 'https://drive.google.com/file/d/1LZGynVx23psHWs-rRPPx1Dkpby4BtCm0/view?usp=sharing';
 
 export const BOOKLET_INSIDE = [
   { heroId: 'vayu' as HeroId, text: 'Learn about air pollution through facts and Hawa Hero Actions.' },

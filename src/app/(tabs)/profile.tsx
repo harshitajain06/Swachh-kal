@@ -10,6 +10,7 @@ import { HERO_ORDER, ROLES, TIERS } from '../../data/content';
 import { dayKey } from '../../lib/dates';
 import { api } from '../../lib/api';
 import { useGame } from '../../lib/game';
+import { testReminders } from '../../lib/notifications';
 import { colors, fonts, radius } from '../../theme';
 
 function Stat({ icon, value, label, delay }: { icon: string; value: string | number; label: string; delay: number }) {
@@ -25,7 +26,7 @@ function Stat({ icon, value, label, delay }: { icon: string; value: string | num
 export default function Profile() {
   const { signOut } = useAuth();
   const { user } = useUser();
-  const { profile, totalDone, streak, count, checkins, reviewed, points, deleteMyData } = useGame();
+  const { profile, totalDone, streak, count, checkins, reviewed, points, deleteMyData, nextHero } = useGame();
   const [isAdmin, setIsAdmin] = useState(false);
   useEffect(() => {
     api('/api/admin/summary').then((d) => setIsAdmin(!!d));
@@ -70,6 +71,17 @@ export default function Profile() {
           <View style={{ gap: 10, marginTop: 14 }}>
             <Button label="Daily check-in" icon="⏰" onPress={() => router.push('/checkin')} color={colors.pink} dark="#C93A80" />
             {!reviewed && <Button label="Rate Swachh Kal" icon="⭐" onPress={() => router.push('/review')} color="#FFB300" dark="#C98300" />}
+            {__DEV__ && (
+              <Button
+                label="Test reminders (dev)"
+                icon="🔔"
+                onPress={async () => {
+                  const ok = await testReminders({ unlocked: [], activeHero: nextHero, activeHeroDone: nextHero ? count(nextHero) : 0, streak, habitToday: false, activeToday: false });
+                  Alert.alert(ok ? 'Reminders on the way' : 'Notifications are off', ok ? 'Four reminders arrive over the next ~25 seconds. Press Cmd+Shift+H to go to the home screen to see them as banners.' : 'Allow notifications for Expo Go in Settings.');
+                }}
+                color="#fff" dark="#E0D6B8"
+              />
+            )}
             <Button label="Privacy notice" icon="🔒" onPress={() => router.push('/consent?view=1')} color="#fff" dark="#E0D6B8" />
             {isAdmin && <Button label="Team dashboard" icon="📊" onPress={() => router.push('/admin')} color={colors.brand} dark={colors.brandDark} />}
             <Button

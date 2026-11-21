@@ -164,6 +164,9 @@ export function CelebrationHost() {
             <Pulse>
               <Button label={cta} onPress={close} color="#FFC93C" dark="#C98F00" style={{ minWidth: 220 }} />
             </Pulse>
+            {celebration.kind === 'hero-complete' || celebration.kind === 'superhero' ? (
+              <Button label="Get my certificate" icon="📜" onPress={() => { dismissCelebration(); router.push('/certificates'); }} color="#fff" dark="#E0D6B8" style={{ minWidth: 220, marginTop: 12 }} />
+            ) : null}
           </Animated.View>
         ) : null}
       </View>

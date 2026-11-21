@@ -18,7 +18,7 @@ export default function About() {
       <SafeAreaView style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={{ padding: 22, paddingBottom: 130 }}>
           {pledgedAt ? (
-            <Bouncy onPress={() => router.back()} style={{ alignSelf: 'flex-start', paddingVertical: 6 }}>
+            <Bouncy onPress={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)'))} style={{ alignSelf: 'flex-start', paddingVertical: 6 }}>
               <T v="label" style={{ color: colors.brand }}>← Back</T>
             </Bouncy>
           ) : null}

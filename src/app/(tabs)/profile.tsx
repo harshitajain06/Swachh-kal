@@ -69,6 +69,7 @@ export default function Profile() {
             </View>
           </Card>
           <View style={{ gap: 10, marginTop: 14 }}>
+            <Button label="My certificates" icon="📜" onPress={() => router.push('/certificates')} color={colors.mint} dark="#12A072" />
             <Button label="Daily check-in" icon="⏰" onPress={() => router.push('/checkin')} color={colors.pink} dark="#C93A80" />
             {!reviewed && <Button label="Rate Swachh Kal" icon="⭐" onPress={() => router.push('/review')} color="#FFB300" dark="#C98300" />}
             {__DEV__ && (

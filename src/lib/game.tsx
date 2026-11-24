@@ -13,6 +13,8 @@ export interface Profile {
   city: string;
   role: string;
   gender: string;
+  /** Optional school or group, used for the aggregate leaderboard. */
+  school?: string;
 }
 
 export interface CheckIn {
@@ -129,7 +131,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           checkins[c.date] = { ...checkins[c.date], morningCommitted: c.morningCommitted, eveningSaved: c.eveningSaved, eveningCompleted: c.eveningCompleted };
         });
         const profile: Profile | null = me.role
-          ? { name: me.name || user?.firstName || '', age: me.age, country: me.country || '', city: me.city || '', role: me.role, gender: me.gender || '' }
+          ? { name: me.name || user?.firstName || '', age: me.age, country: me.country || '', city: me.city || '', role: me.role, gender: me.gender || '', school: me.school || local.profile?.school }
           : local.profile;
         setState({
           ...local,

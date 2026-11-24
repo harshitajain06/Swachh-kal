@@ -28,11 +28,12 @@ export default function Onboarding() {
   const [city, setCity] = useState('');
   const [role, setRole] = useState('');
   const [gender, setGender] = useState('');
+  const [school, setSchool] = useState('');
 
   const valid = [name.trim().length > 0, country.trim() && city.trim(), !!role, !!gender][step];
   const next = async () => {
     if (step < 3) return setStep(step + 1);
-    await saveProfile({ name: name.trim(), age: age ? parseInt(age, 10) : undefined, country: country.trim(), city: city.trim(), role, gender });
+    await saveProfile({ name: name.trim(), age: age ? parseInt(age, 10) : undefined, country: country.trim(), city: city.trim(), role, gender, school: school.trim() || undefined });
     router.replace('/consent');
   };
 
@@ -77,6 +78,7 @@ export default function Onboarding() {
                 <>
                   <TextInput style={input} placeholder="Country" placeholderTextColor="#A9A2C4" value={country} onChangeText={setCountry} />
                   <TextInput style={input} placeholder="City" placeholderTextColor="#A9A2C4" value={city} onChangeText={setCity} />
+                  <TextInput style={input} placeholder="School or group (optional)" placeholderTextColor="#A9A2C4" maxLength={60} value={school} onChangeText={setSchool} />
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                     {CITIES.map((c) => (
                       <Bouncy key={c} onPress={() => { setCity(c); setCountry('India'); }} style={chip(city === c)}>

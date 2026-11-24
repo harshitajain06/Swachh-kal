@@ -35,6 +35,7 @@ const UserSchema = new mongoose.Schema(
     city: String,
     role: String, // student | teacher | parent | ...
     gender: String,
+    school: String, // optional school or group, used for the aggregate leaderboard
     pledgedAt: Date,
     consentAt: Date, // parent/guardian (or adult) accepted the privacy notice
     consentVersion: String,
@@ -72,7 +73,21 @@ const DeviceSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+// A child's request for a civic resource (blue bin, leaking tap…). Reviewed by the Swachh Kal team.
+const HubRequestSchema = new mongoose.Schema(
+  {
+    clerkId: { type: String, index: true },
+    kind: { type: String, enum: ['blue-bin', 'dustbin', 'leaking-tap', 'tree-guard', 'other'] },
+    locality: String, // colony / block / school, typed by the child — no GPS
+    note: String,
+    city: String,
+    status: { type: String, enum: ['new', 'forwarded', 'done'], default: 'new' },
+  },
+  { timestamps: true },
+);
+
 module.exports = {
+  HubRequest: mongoose.model('HubRequest', HubRequestSchema),
   User: mongoose.model('User', UserSchema),
   Device: mongoose.model('Device', DeviceSchema),
 };

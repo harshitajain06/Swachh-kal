@@ -52,6 +52,13 @@ export default function Learn() {
                 <T v="small">Complete habits. Earn badges. Become a Hero!</T>
               </View>
             </Bouncy>
+            <Bouncy onPress={() => router.push('/hub')} style={{ backgroundColor: '#fff', borderRadius: radius.lg, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12, ...shadow }}>
+              <Text style={{ fontSize: 36 }}>🏛️</Text>
+              <View style={{ flex: 1 }}>
+                <T v="h3">Action Hub</T>
+                <T v="small">Request a bin, join drives, climb the school leaderboard.</T>
+              </View>
+            </Bouncy>
             <Bouncy onPress={() => router.push('/certificate')} style={{ backgroundColor: '#fff', borderRadius: radius.lg, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12, ...shadow }}>
               <Text style={{ fontSize: 36 }}>📜</Text>
               <View style={{ flex: 1 }}>

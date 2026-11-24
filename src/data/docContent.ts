@@ -303,7 +303,7 @@ export const DOC: Record<'vayu' | 'tarun' | 'dharti' | 'jal', DocTheme> = {
       },
       {
         "k": "h2",
-        "t": "When Trees Disappear"
+        "t": "When Trees Disappear: Deforestation"
       },
       {
         "k": "p",
@@ -328,6 +328,18 @@ export const DOC: Record<'vayu' | 'tarun' | 'dharti' | 'jal', DocTheme> = {
       {
         "k": "p",
         "t": "When too many trees are cut, the balance of nature is affected."
+      },
+      {
+        "k": "p",
+        "t": "Cutting down or clearing lots of trees is called deforestation."
+      },
+      {
+        "k": "h2",
+        "t": "30 Years Back vs Now"
+      },
+      {
+        "k": "p",
+        "t": "In 1990 the world had more forest than it has today. Over the last 30 years, the world has lost about 178 million hectares of forest, more than has grown back. That is about the size of the whole country of Libya! (Source: FAO Global Forest Resources Assessment 2020)"
       },
       {
         "k": "h2",
@@ -556,6 +568,46 @@ export const DOC: Record<'vayu' | 'tarun' | 'dharti' | 'jal', DocTheme> = {
           "This waste is dangerous",
           "It should never be mixed with other waste"
         ]
+      },
+      {
+        "k": "h2",
+        "t": "Plastic Pollution"
+      },
+      {
+        "k": "p",
+        "t": "Plastic bags, bottles and wrappers are used for a few minutes, but they can stay on Earth for years."
+      },
+      {
+        "k": "p",
+        "t": "Plastic can break into tiny pieces called microplastics, which stay in the soil for years. Animals often mistake plastic for food, and it can harm them."
+      },
+      {
+        "k": "b",
+        "t": "The world makes about 353 million tons of plastic waste every year."
+      },
+      {
+        "k": "b",
+        "t": "Only about 9% of plastic waste is recycled."
+      },
+      {
+        "k": "b",
+        "t": "About 8 to 11 million tons of plastic leak into the oceans every year."
+      },
+      {
+        "k": "h2",
+        "t": "What Can You Do About Plastic?"
+      },
+      {
+        "k": "b",
+        "t": "Carry a cloth bag and skip plastic bags."
+      },
+      {
+        "k": "b",
+        "t": "Carry your own spoon, tiffin and water bottle and avoid single-use plastic."
+      },
+      {
+        "k": "b",
+        "t": "Rinse plastic items and put them in the right bin for recycling."
       }
     ]
   },

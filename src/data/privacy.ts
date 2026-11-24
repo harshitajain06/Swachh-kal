@@ -12,7 +12,8 @@ export const PRIVACY_SUMMARY = [
 
 export const PRIVACY_FULL = [
   'Swachh Kal is a student-led sustainability initiative founded by Mehr Dhawan. This app is designed for children in Delhi NCR.',
-  'We collect only what is needed to run the app: the name you choose, age, country and city, the kind of user you are, gender (optional), your habit and badge progress, daily check-ins, the time spent on stories, facts, videos and articles, and a notification token if you allow notifications.',
+  'We collect only what is needed to run the app: the name you choose, age, country and city, the kind of user you are, gender (optional), your school or group (optional), your habit and badge progress, daily check-ins, the time spent on stories, facts, videos and articles, and a notification token if you allow notifications.',
+  'If you use the Action Hub, we also keep the requests you send (what you need and the colony, block or school you type). Please do not type a full name, phone number or home address. The school leaderboard shows only school names and averages, never children’s names, and only for schools with several children.',
   'Sign-in is handled by Clerk (email or Google). Progress is stored in our database (MongoDB Atlas). We do not use advertising or third-party tracking.',
   'Reports shown to the Swachh Kal team are aggregated (for example, how many children finished a hero). Only a small group of authorised team members can see individual records.',
   'Children under 18 need a parent or guardian to agree before using the app. A parent or guardian can ask for the account and all its data to be deleted at any time using Me → Delete my data.',

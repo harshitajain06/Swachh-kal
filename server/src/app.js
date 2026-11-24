@@ -4,7 +4,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const mongoose = require('mongoose');
 const { clerkMiddleware, getAuth, clerkClient } = require('@clerk/express');
-const { User, Device } = require('./models');
+const { User, Device, HubRequest } = require('./models');
 const { sendReminders } = require('./push');
 
 const app = express();
@@ -71,7 +71,8 @@ app.get('/api/me', auth, wrap(async (req, res) => {
 }));
 
 app.put('/api/me', auth, wrap(async (req, res) => {
-  Object.assign(req.user, pick(req.body, ['name', 'age', 'country', 'city', 'role', 'gender', 'platform', 'consentVersion', 'guardianConsent']));
+  Object.assign(req.user, pick(req.body, ['name', 'age', 'country', 'city', 'role', 'gender', 'school', 'platform', 'consentVersion', 'guardianConsent']));
+  if (typeof req.user.school === 'string') req.user.school = req.user.school.trim().slice(0, 60);
   await req.user.save();
   res.json(req.user);
 }));
@@ -88,6 +89,7 @@ app.post('/api/consent', auth, wrap(async (req, res) => {
 app.delete('/api/me', auth, wrap(async (req, res) => {
   await User.deleteOne({ clerkId: req.userId });
   await Device.deleteMany({ clerkId: req.userId });
+  await HubRequest.deleteMany({ clerkId: req.userId });
   try {
     await clerkClient.users.deleteUser(req.userId);
   } catch (e) {
@@ -203,6 +205,53 @@ app.get('/api/admin/users', requireUser, requireAdmin, wrap(async (_req, res) =>
   res.json(users);
 }));
 
+
+// ---- Action Hub ----
+const REQUEST_KINDS = ['blue-bin', 'dustbin', 'leaking-tap', 'tree-guard', 'other'];
+const MIN_LEADERBOARD_GROUP = 5; // a school only appears once 5+ children share it, so no child can be singled out
+
+app.post('/api/hub/requests', auth, wrap(async (req, res) => {
+  const { kind, locality, note } = req.body || {};
+  if (!REQUEST_KINDS.includes(kind) || typeof locality !== 'string' || !locality.trim()) return res.status(400).json({ error: 'kind and locality required' });
+  const today = await HubRequest.countDocuments({ clerkId: req.userId, createdAt: { $gte: new Date(Date.now() - DAY) } });
+  if (today >= 5) return res.status(429).json({ error: 'too_many_requests' });
+  await HubRequest.create({ clerkId: req.userId, kind, locality: locality.trim().slice(0, 80), note: String(note || '').trim().slice(0, 300), city: req.user.city });
+  res.json({ ok: true });
+}));
+
+app.get('/api/hub/requests/mine', auth, wrap(async (req, res) => {
+  res.json(await HubRequest.find({ clerkId: req.userId }, 'kind locality status createdAt').sort({ createdAt: -1 }).limit(20));
+}));
+
+// Aggregate only: school name, number of children and habits per child. Never individual names.
+app.get('/api/leaderboard', auth, wrap(async (req, res) => {
+  const rows = await User.aggregate([
+    { $match: { school: { $exists: true, $nin: [null, ''] }, consentAt: { $exists: true } } },
+    { $group: { _id: { $toLower: { $trim: { input: '$school' } } }, school: { $first: '$school' }, members: { $sum: 1 }, habits: { $sum: { $size: { $ifNull: ['$completedHabits', []] } } } } },
+    { $match: { members: { $gte: MIN_LEADERBOARD_GROUP } } },
+    { $addFields: { perChild: { $round: [{ $divide: ['$habits', '$members'] }, 1] } } },
+    { $sort: { perChild: -1, members: -1 } },
+    { $limit: 20 },
+  ]);
+  const mine = (req.user.school || '').trim().toLowerCase();
+  const rank = mine ? rows.findIndex((r) => r._id === mine) : -1;
+  const mineCount = mine ? await User.countDocuments({ school: new RegExp(`^\\s*${mine.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'i') }) : 0;
+  res.json({
+    minGroup: MIN_LEADERBOARD_GROUP,
+    board: rows.map((r, i) => ({ rank: i + 1, school: r.school, members: r.members, perChild: r.perChild })),
+    mine: mine ? { school: req.user.school, rank: rank >= 0 ? rank + 1 : null, members: mineCount } : null,
+  });
+}));
+
+app.get('/api/admin/requests', requireUser, requireAdmin, wrap(async (_req, res) => {
+  res.json(await HubRequest.find({}, 'kind locality note city status createdAt').sort({ createdAt: -1 }).limit(500));
+}));
+
+app.patch('/api/admin/requests/:id', requireUser, requireAdmin, wrap(async (req, res) => {
+  if (!['new', 'forwarded', 'done'].includes(req.body?.status)) return res.status(400).json({ error: 'bad status' });
+  await HubRequest.updateOne({ _id: req.params.id }, { status: req.body.status });
+  res.json({ ok: true });
+}));
 
 // Cached connection: serverless invocations reuse it while the instance is warm.
 let conn = null;

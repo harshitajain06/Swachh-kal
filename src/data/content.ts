@@ -339,11 +339,4 @@ export const HOW_IT_WORKS = [
 export const PLEDGE_365 = {
   title: 'Swachh Kal 365-Day Pledge',
   intro: 'One small habit a day. 365 days. One cleaner tomorrow.',
-  // Placeholder cycle — final 365-day content is still to be drafted with the client (see handover notes).
-  months: [
-    'Month 1 · Notice — spot what hurts our planet',
-    'Month 2 · Choose — make the better choice',
-    'Month 3 · Share — bring a friend along',
-    'Month 4 · Repeat — turn habits into routine',
-  ],
 };

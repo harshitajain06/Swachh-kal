@@ -40,7 +40,7 @@ export default function Badges() {
             return (
               <Card key={h.id} delay={200 + i * 120} style={{ marginTop: 14 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Character id={h.id} size={64} cape={isComplete(h.id)} still />
+                  <Character id={h.id} size={64} cape={isComplete(h.id)} progress={count(h.id) / 5} still />
                   <View style={{ marginLeft: 8, flex: 1 }}>
                     <T v="h3">{h.heroTitle}</T>
                     <T v="small">Protect {h.name} · {count(h.id)}/5 habits</T>

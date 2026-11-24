@@ -12,10 +12,14 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Circle, Defs, Ellipse, G, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
 import { HeroId } from '../data/content';
+import { mix } from '../theme';
 
 const AEllipse = Animated.createAnimatedComponent(Ellipse);
 
-type Mood = 'happy' | 'sad' | 'cheer';
+type Mood = 'happy' | 'sad' | 'cheer' | 'neutral';
+
+/** The grey a character fades to while polluted. */
+const SMOG_GREY = '#8F959C';
 
 function Face({ cx, cy, mood, scale = 1 }: { cx: number; cy: number; mood: Mood; scale?: number }) {
   const ry = useSharedValue(8);
@@ -34,6 +38,7 @@ function Face({ cx, cy, mood, scale = 1 }: { cx: number; cy: number; mood: Mood;
       <Ellipse cx={cx - 36 * s} cy={cy + 12 * s} rx={8 * s} ry={5 * s} fill="#FF7BAC" opacity={0.55} />
       <Ellipse cx={cx + 36 * s} cy={cy + 12 * s} rx={8 * s} ry={5 * s} fill="#FF7BAC" opacity={0.55} />
       {mood === 'happy' && <Path d={`M ${cx - 11 * s} ${cy + 12 * s} Q ${cx} ${cy + 26 * s} ${cx + 11 * s} ${cy + 12 * s}`} stroke="#2B2350" strokeWidth={4 * s} strokeLinecap="round" fill="none" />}
+      {mood === 'neutral' && <Path d={`M ${cx - 9 * s} ${cy + 18 * s} L ${cx + 9 * s} ${cy + 18 * s}`} stroke="#2B2350" strokeWidth={4 * s} strokeLinecap="round" fill="none" />}
       {mood === 'sad' && <Path d={`M ${cx - 10 * s} ${cy + 22 * s} Q ${cx} ${cy + 10 * s} ${cx + 10 * s} ${cy + 22 * s}`} stroke="#2B2350" strokeWidth={4 * s} strokeLinecap="round" fill="none" />}
       {mood === 'cheer' && (
         <Path d={`M ${cx - 14 * s} ${cy + 10 * s} Q ${cx} ${cy + 36 * s} ${cx + 14 * s} ${cy + 10 * s} Z`} fill="#C2185B" stroke="#2B2350" strokeWidth={3 * s} strokeLinejoin="round" />
@@ -46,14 +51,15 @@ function Cape({ color }: { color: string }) {
   return <Path d="M 62 92 Q 20 140 36 196 Q 100 172 164 196 Q 180 140 138 92 Z" fill={color} opacity={0.95} />;
 }
 
-function Body({ id, mood, cape }: { id: HeroId; mood: Mood; cape: boolean }) {
+function Body({ id, mood, cape, t }: { id: HeroId; mood: Mood; cape: boolean; t: number }) {
+  const c = (hex: string) => (t >= 1 ? hex : mix(SMOG_GREY, hex.length === 4 ? '#' + [...hex.slice(1)].map((x) => x + x).join('') : hex, t));
   switch (id) {
     case 'vayu':
       return (
         <G>
           {cape && <Cape color="#FF4D6D" />}
-          <Path d="M20 70 Q40 62 60 70 M10 90 Q36 80 52 90" stroke="#B5ECFF" strokeWidth={5} strokeLinecap="round" fill="none" />
-          <Path d="M150 60 Q170 52 186 62 Q196 76 182 82" stroke="#B5ECFF" strokeWidth={5} strokeLinecap="round" fill="none" />
+          <Path d="M20 70 Q40 62 60 70 M10 90 Q36 80 52 90" stroke={c('#B5ECFF')} strokeWidth={5} strokeLinecap="round" fill="none" />
+          <Path d="M150 60 Q170 52 186 62 Q196 76 182 82" stroke={c('#B5ECFF')} strokeWidth={5} strokeLinecap="round" fill="none" />
           <G>
             <Circle cx={66} cy={112} r={40} fill="url(#vg)" />
             <Circle cx={108} cy={88} r={48} fill="url(#vg)" />
@@ -67,13 +73,13 @@ function Body({ id, mood, cape }: { id: HeroId; mood: Mood; cape: boolean }) {
       return (
         <G>
           {cape && <Cape color="#FF4D6D" />}
-          <Path d="M88 150 L84 196 L120 196 L116 150 Z" fill="#9B6A3C" />
-          <Path d="M70 190 Q100 180 134 190" stroke="#7A4F28" strokeWidth={5} strokeLinecap="round" fill="none" />
-          <Circle cx={60} cy={96} r={36} fill="#2FBF4B" />
-          <Circle cx={144} cy={96} r={36} fill="#2FBF4B" />
-          <Circle cx={102} cy={64} r={44} fill="#4FD95E" />
-          <Circle cx={102} cy={116} r={46} fill="#3FD055" />
-          <Path d="M102 22 Q108 6 124 8 Q122 24 102 22 Z" fill="#8BE86B" />
+          <Path d="M88 150 L84 196 L120 196 L116 150 Z" fill={c('#9B6A3C')} />
+          <Path d="M70 190 Q100 180 134 190" stroke={c('#7A4F28')} strokeWidth={5} strokeLinecap="round" fill="none" />
+          <Circle cx={60} cy={96} r={36} fill={c('#2FBF4B')} />
+          <Circle cx={144} cy={96} r={36} fill={c('#2FBF4B')} />
+          <Circle cx={102} cy={64} r={44} fill={c('#4FD95E')} />
+          <Circle cx={102} cy={116} r={46} fill={c('#3FD055')} />
+          <Path d="M102 22 Q108 6 124 8 Q122 24 102 22 Z" fill={c('#8BE86B')} />
           <Face cx={102} cy={108} mood={mood} />
         </G>
       );
@@ -82,10 +88,10 @@ function Body({ id, mood, cape }: { id: HeroId; mood: Mood; cape: boolean }) {
         <G>
           {cape && <Cape color="#FF4D6D" />}
           <Circle cx={100} cy={106} r={72} fill="url(#dg)" />
-          <Path d="M52 84 Q66 56 92 62 Q96 82 78 90 Q64 108 52 84 Z" fill="#4FD95E" />
-          <Path d="M130 130 Q158 112 160 140 Q150 168 128 156 Q120 142 130 130 Z" fill="#4FD95E" />
-          <Path d="M112 50 Q132 44 142 62 Q124 70 112 50 Z" fill="#4FD95E" />
-          <Ellipse cx={72} cy={72} rx={14} ry={8} fill="#fff" opacity={0.35} transform="rotate(-30 72 72)" />
+          <Path d="M52 84 Q66 56 92 62 Q96 82 78 90 Q64 108 52 84 Z" fill={c('#4FD95E')} />
+          <Path d="M130 130 Q158 112 160 140 Q150 168 128 156 Q120 142 130 130 Z" fill={c('#4FD95E')} />
+          <Path d="M112 50 Q132 44 142 62 Q124 70 112 50 Z" fill={c('#4FD95E')} />
+          <Ellipse cx={72} cy={72} rx={14} ry={8} fill={c('#fff')} opacity={0.35} transform="rotate(-30 72 72)" />
           <Face cx={100} cy={108} mood={mood} />
         </G>
       );
@@ -94,11 +100,33 @@ function Body({ id, mood, cape }: { id: HeroId; mood: Mood; cape: boolean }) {
         <G>
           {cape && <Cape color="#FF4D6D" />}
           <Path d="M100 14 C100 14 40 88 40 130 A60 60 0 0 0 160 130 C160 88 100 14 100 14 Z" fill="url(#jg)" />
-          <Path d="M64 120 Q62 94 82 70" stroke="#fff" strokeWidth={8} strokeLinecap="round" fill="none" opacity={0.55} />
+          <Path d="M64 120 Q62 94 82 70" stroke={c('#fff')} strokeWidth={8} strokeLinecap="round" fill="none" opacity={0.55} />
           <Face cx={100} cy={128} mood={mood} />
         </G>
       );
   }
+}
+
+/** Haze and soot drawn over a character that hasn't finished its mission; fades away as progress grows. */
+function Smog({ amount }: { amount: number }) {
+  return (
+    <G>
+      <G opacity={amount * 0.5}>
+        <Circle cx={66} cy={108} r={38} fill="#7C838B" />
+        <Circle cx={112} cy={84} r={44} fill="#7C838B" />
+        <Circle cx={148} cy={116} r={36} fill="#7C838B" />
+        <Circle cx={100} cy={146} r={40} fill="#7C838B" />
+      </G>
+      <G opacity={amount * 0.85} fill="#5E646B">
+        <Circle cx={30} cy={44} r={7} />
+        <Circle cx={174} cy={52} r={5} />
+        <Circle cx={22} cy={150} r={5} />
+        <Circle cx={178} cy={166} r={7} />
+        <Circle cx={100} cy={26} r={4} />
+        <Circle cx={60} cy={176} r={4} />
+      </G>
+    </G>
+  );
 }
 
 export interface CharacterProps {
@@ -113,9 +141,18 @@ export interface CharacterProps {
   still?: boolean;
   /** one-shot jump (e.g. on celebration) */
   jump?: boolean;
+  /**
+   * 0–1 progress of this hero's mission. Below 1 the character is smoggy and greyed, getting clearer, more
+   * colourful and happier as it grows; 1 (or leaving it out) shows the normal happy character.
+   */
+  progress?: number;
 }
 
-export function Character({ id, size = 140, mood = 'happy', cape = false, locked = false, still = false, jump = false }: CharacterProps) {
+export function Character({ id, size = 140, mood = 'happy', cape = false, locked = false, still = false, jump = false, progress }: CharacterProps) {
+  const p = progress === undefined ? 1 : Math.max(0, Math.min(1, progress));
+  const polluted = !locked && p < 1;
+  const shownMood: Mood = polluted ? (p < 0.4 ? 'sad' : p < 0.6 ? 'neutral' : 'happy') : mood;
+  const gc = (hex: string) => (p >= 1 ? hex : mix(SMOG_GREY, hex, p));
   const y = useSharedValue(0);
   const rot = useSharedValue(0);
   const sx = useSharedValue(1);
@@ -160,24 +197,27 @@ export function Character({ id, size = 140, mood = 'happy', cape = false, locked
       <Svg width={size} height={size} viewBox="0 0 200 200">
         <Defs>
           <LinearGradient id="vg" x1="0" y1="0" x2="0" y2="1">
-            <Stop offset="0" stopColor="#FFFFFF" />
-            <Stop offset="1" stopColor="#BDEBFF" />
+            <Stop offset="0" stopColor={gc('#FFFFFF')} />
+            <Stop offset="1" stopColor={gc('#BDEBFF')} />
           </LinearGradient>
           <LinearGradient id="dg" x1="0" y1="0" x2="0" y2="1">
-            <Stop offset="0" stopColor="#5CC8FF" />
-            <Stop offset="1" stopColor="#2A8AE8" />
+            <Stop offset="0" stopColor={gc('#5CC8FF')} />
+            <Stop offset="1" stopColor={gc('#2A8AE8')} />
           </LinearGradient>
           <LinearGradient id="jg" x1="0" y1="0" x2="0" y2="1">
-            <Stop offset="0" stopColor="#8FD3FF" />
-            <Stop offset="1" stopColor="#3A6BFF" />
+            <Stop offset="0" stopColor={gc('#8FD3FF')} />
+            <Stop offset="1" stopColor={gc('#3A6BFF')} />
           </LinearGradient>
         </Defs>
         {locked ? (
           <G opacity={0.9}>
-            <Body id={id} mood="sad" cape={false} />
+            <Body id={id} mood="sad" cape={false} t={0} />
           </G>
         ) : (
-          <Body id={id} mood={mood} cape={cape} />
+          <>
+            <Body id={id} mood={shownMood} cape={cape} t={p} />
+            {polluted ? <Smog amount={1 - p} /> : null}
+          </>
         )}
       </Svg>
       {locked && (

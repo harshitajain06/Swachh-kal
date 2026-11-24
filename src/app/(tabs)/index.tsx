@@ -37,7 +37,7 @@ function HeroCard({ hero, index }: { hero: Hero; index: number }) {
         <Bouncy onPress={open} haptic={unlocked}>
           <LinearGradient colors={unlocked ? [mix(SMOG[0], hero.colors[0], n / 5), mix(SMOG[1], hero.colors[1], n / 5)] : ['#C9C3DA', '#A9A2C4']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: radius.lg, padding: 14, minHeight: 230, ...shadow }}>
             <View style={{ alignItems: 'center', marginTop: -2 }}>
-              <Character id={hero.id} size={104} locked={!unlocked} cape={isComplete(hero.id)} />
+              <Character id={hero.id} size={104} locked={!unlocked} cape={isComplete(hero.id)} progress={n / 5} />
             </View>
             <View style={{ alignSelf: 'flex-start', backgroundColor: '#00000026', borderRadius: 12, paddingHorizontal: 8, paddingVertical: 2, marginBottom: 2 }}>
               <Text style={{ fontFamily: fonts.bodyBold, fontSize: 11, color: '#fff' }}>{!unlocked ? '🔒 Locked' : isComplete(hero.id) ? '✅ Completed' : n > 0 ? '⏳ In Progress' : '✨ New'}</Text>

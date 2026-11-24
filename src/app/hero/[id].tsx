@@ -387,7 +387,7 @@ export default function HeroScreen() {
             </Bouncy>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, marginTop: 4 }}>
-            <Character id={id} size={96} cape={isComplete(id)} mood={stage === 1 ? 'sad' : stage === 2 ? 'happy' : 'cheer'} />
+            <Character id={id} size={96} cape={isComplete(id)} mood={stage === 3 ? 'cheer' : 'happy'} progress={n / 5} />
             <View style={{ marginLeft: 10, flex: 1 }}>
               <Text style={{ fontFamily: fonts.display, fontSize: 34, color: '#fff', lineHeight: 38 }}>{hero.hindi}</Text>
               <Text style={{ fontFamily: fonts.displayMed, fontSize: 18, color: '#ffffffe8' }}>{hero.element} · {hero.name}</Text>

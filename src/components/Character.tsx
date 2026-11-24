@@ -11,7 +11,9 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import Svg, { Circle, Defs, Ellipse, G, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
+import { Image } from 'expo-image';
 import { HeroId } from '../data/content';
+import { HERO_SCENE } from '../data/art';
 import { mix } from '../theme';
 
 const AEllipse = Animated.createAnimatedComponent(Ellipse);
@@ -192,6 +194,24 @@ export function Character({ id, size = 140, mood = 'happy', cape = false, locked
     ],
   }));
 
+  // The doc's character art is used everywhere except when a hero is completed (or celebrating): then the original happy drawing shows.
+  const celebrate = !locked && (mood === 'cheer' || (progress !== undefined && p >= 1));
+  const art = celebrate ? undefined : HERO_SCENE[id];
+  if (art) {
+    return (
+      <Animated.View style={[{ width: size, height: size }, a]}>
+        <Image source={art} style={{ width: size, height: size, opacity: locked ? 0.4 : polluted ? 0.7 + 0.3 * p : 1 }} contentFit="contain" transition={300} />
+        {cape && !locked && <Animated.Text style={{ position: 'absolute', top: -size * 0.08, alignSelf: 'center', fontSize: size * 0.3 }}>👑</Animated.Text>}
+        {mood === 'cheer' && !locked && <Animated.Text style={{ position: 'absolute', right: -size * 0.04, top: -size * 0.04, fontSize: size * 0.24 }}>✨</Animated.Text>}
+        {locked && (
+          <View style={{ position: 'absolute', right: 0, bottom: 0, width: size * 0.3, height: size * 0.3, borderRadius: 99, backgroundColor: '#2B2350', alignItems: 'center', justifyContent: 'center' }}>
+            <Animated.Text style={{ fontSize: size * 0.17 }}>🔒</Animated.Text>
+          </View>
+        )}
+      </Animated.View>
+    );
+  }
+
   return (
     <Animated.View style={[{ width: size, height: size, opacity: locked ? 0.5 : 1 }, a]}>
       <Svg width={size} height={size} viewBox="0 0 200 200">
@@ -229,5 +249,4 @@ export function Character({ id, size = 140, mood = 'happy', cape = false, locked
   );
 }
 
-/** Replace SVG art with the client's PNGs by swapping this map (Vayu.png etc.) */
-export const HERO_IMAGES: Partial<Record<HeroId, any>> = {};
+

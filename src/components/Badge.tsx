@@ -22,7 +22,7 @@ export function HeroBadge({ heroId, tier, size = 96, earned = true, animate = tr
   return (
     <Animated.View style={[{ width: size, height: size }, a]}>
       <View style={{ width: size, height: size, borderRadius: size * 0.2, overflow: 'hidden', opacity: earned ? 1 : 0.28 }}>
-        <Image source={LEVEL_BADGE[tier]} style={{ width: size, height: size }} contentFit="cover" />
+        <Image source={LEVEL_BADGE[tier]} style={{ width: size, height: size }} contentFit="contain" />
         {earned && animate ? <Animated.View pointerEvents="none" style={[{ position: 'absolute', top: -size * 0.1, width: size * 0.12, height: size * 1.3, backgroundColor: '#fff' }, sh]} /> : null}
       </View>
       <View style={{ position: 'absolute', right: -2, bottom: -2, width: size * 0.34, height: size * 0.34, borderRadius: 99, backgroundColor: hero.colors[1], borderWidth: 2, borderColor: '#fff', alignItems: 'center', justifyContent: 'center' }}>
@@ -53,7 +53,7 @@ export function SuperBadge({ size = 140, earned = true }: { size?: number; earne
         </Svg>
       </Animated.View>
       <Animated.View style={[{ width: size * 0.78, height: size * 0.78, borderRadius: size * 0.2, overflow: 'hidden' }, body]}>
-        <Image source={ULTIMATE_BADGE} style={{ width: '100%', height: '100%' }} contentFit="cover" />
+        <Image source={ULTIMATE_BADGE} style={{ width: "100%", height: "100%" }} contentFit="contain" />
       </Animated.View>
     </View>
   );

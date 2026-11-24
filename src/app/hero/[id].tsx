@@ -80,8 +80,8 @@ function StoryTab({ id, onDone }: { id: HeroId; onDone: () => void }) {
     <View style={{ padding: 18 }}>
       <View style={{ alignItems: 'center' }}>
         {sad ? (
-          <Animated.View key={'pic' + id} entering={ZoomIn.springify().damping(12)} style={{ width: '100%', height: 230, borderRadius: 28, overflow: 'hidden', marginBottom: 12, backgroundColor: '#fff', ...shadow }}>
-            <Image source={HERO_SCENE[id]} style={{ width: '100%', height: '100%' }} contentFit="cover" contentPosition="center" />
+          <Animated.View key={'pic' + id} entering={ZoomIn.springify().damping(12)} style={{ width: '100%', height: 230, borderRadius: 28, overflow: 'hidden', marginBottom: 12, backgroundColor: hero.soft, padding: 8, ...shadow }}>
+            <Image source={HERO_SCENE[id]} style={{ width: '100%', height: '100%' }} contentFit="contain" />
           </Animated.View>
         ) : (
           <Character id={id} size={140} mood={mood} />
